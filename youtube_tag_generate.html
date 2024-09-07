@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Tag Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 90%;
+            width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: #6c63ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #6c63ff;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #5a54d6;
+            transform: scale(1.02);
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            margin-top: 10px;
+            height: 8px;
+            position: relative;
+            overflow: hidden;
+            display: none; /* Initially hidden */
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #6c63ff, #a3a1f0);
+            border-radius: 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loading 5s linear;
+        }
+
+        @keyframes loading {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .tags-container {
+            margin-top: 20px;
+            text-align: left;
+            display: none; /* Initially hidden */
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            color: #555;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tag-container-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .copy-button {
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 10px;
+            display: none; /* Initially hidden */
+        }
+
+        .copy-button:hover {
+            background-color: #e64a19;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>YouTube Tag Generator</h1>
+        <div class="input-wrapper">
+            <input type="text" id="videoTitle" placeholder="Enter YouTube Video Title">
+        </div>
+        <button id="generateTags">Generate Tags</button>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="tags-container" id="tagsContainer">
+            <div class="tag-container-title">Generated Tags:</div>
+            <div id="tags"></div>
+            <button class="copy-button" id="copyButton">Copy Tags</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("generateTags").addEventListener("click", function () {
+            const title = document.getElementById("videoTitle").value;
+            const progressContainer = document.getElementById("progressContainer");
+            const tagsContainer = document.getElementById("tagsContainer");
+            const tagsElement = document.getElementById("tags");
+            const copyButton = document.getElementById("copyButton");
+
+            if (title) {
+                progressContainer.style.display = 'block';
+                tagsContainer.style.display = 'none';
+                tagsElement.innerHTML = "";
+                copyButton.style.display = 'none';
+                document.getElementById("progressBar").style.width = '100%';
+
+                setTimeout(() => {
+                    fetch(`https://rappid.in/apis/youtube_tags.php?title=${encodeURIComponent(title)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data); // Debugging line to check API response
+                            tagsElement.innerHTML = "";
+                            if (data && Array.isArray(data.tags)) {
+                                if (data.tags.length > 0) {
+                                    data.tags.forEach(tag => {
+                                        const tagElement = document.createElement("span");
+                                        tagElement.className = "tag";
+                                        tagElement.innerText = tag;
+                                        tagsElement.appendChild(tagElement);
+                                    });
+                                    tagsContainer.style.display = 'block';
+                                    copyButton.style.display = 'block';
+                                } else {
+                                    tagsElement.innerHTML = "No tags found.";
+                                    tagsContainer.style.display = 'block';
+                                    copyButton.style.display = 'none';
+                                }
+                            } else {
+                                tagsElement.innerHTML = "Unexpected response format.";
+                                tagsContainer.style.display = 'block';
+                                copyButton.style.display = 'none';
+                            }
+                            progressContainer.style.display = 'none';
+                            document.getElementById("progressBar").style.width = '0';
+                        })
+                        .catch(error => {
+                            console.error("Error generating tags:", error);
+                            tagsElement.innerHTML = "Error fetching tags.";
+                            tagsContainer.style.display = 'block';
+                            copyButton.style.display = 'none';
+                            progressContainer.style.display = 'none';
+                            document.getElementById("progressBar").style.width = '0';
+                        });
+                }, 5000); // Simulate loading time for 5 seconds
+            } else {
+                alert("Please enter a video title.");
+            }
+        });
+
+        document.getElementById("copyButton").addEventListener("click", function () {
+            const tags = Array.from(document.querySelectorAll(".tag")).map(tag => tag.innerText).join(", ");
+            navigator.clipboard.writeText(tags)
+                .then(() => alert("Tags copied to clipboard!"))
+                .catch(err => alert("Failed to copy tags: " + err));
+        });
+    </script>
+
+</body>
+</html>
